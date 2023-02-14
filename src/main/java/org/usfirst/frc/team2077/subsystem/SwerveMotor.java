@@ -3,8 +3,10 @@ package org.usfirst.frc.team2077.subsystem;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
+import com.revrobotics.SparkMaxAbsoluteEncoder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
@@ -13,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.usfirst.frc.team2077.RobotHardware;
 import org.usfirst.frc.team2077.common.WheelPosition;
 import org.usfirst.frc.team2077.common.drivetrain.DriveModuleIF;
+import org.usfirst.frc.team2077.common.subsystem.CANLineSubsystem;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
 
 public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
@@ -28,13 +31,13 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     public enum MotorPosition {
         // MAX_RPM: 5800
-        FRONT_RIGHT(WheelPosition.FRONT_RIGHT, 7, 8, 7, 8, 13, 6.67, 2, 5800),
+        FRONT_RIGHT(WheelPosition.FRONT_RIGHT, 7, 8, 7, 8, 13, 6.67, 2, 5800, 0),
         // Max: 5600
-        FRONT_LEFT(WheelPosition.FRONT_LEFT, 1, 2, 1, 2, 10, 6.67, 2, 5600),
+        FRONT_LEFT(WheelPosition.FRONT_LEFT, 1, 2, 1, 2, 10, 6.67, 2, 5600, 0),
         // Max: 5700
-        BACK_RIGHT(WheelPosition.BACK_RIGHT, 5, 6, 5, 6, 11, 6.67, 2, 5700),
+        BACK_RIGHT(WheelPosition.BACK_RIGHT, 5, 6, 5, 6, 11, 6.67, 2, 5700, 0),
         // Max 5700,
-        BACK_LEFT(WheelPosition.BACK_LEFT, 3, 4, 3, 4, 12, 6.67, 2, 5700);
+        BACK_LEFT(WheelPosition.BACK_LEFT, 3, 4, 3, 4, 12, 6.67, 2, 5700, 0);
 
         private final WheelPosition wheelPosition;
         private final int directionId;
@@ -46,6 +49,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         private final double radius;
         private final double maxRPM;
         private final double wheelCircumference;
+        private final double encoderOffset;
 
         private MotorPosition(
               WheelPosition wheelPosition,
@@ -56,7 +60,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
               int hallEffectChannel,
               double gearRatio,
               double radius,
-              double maxRPM
+              double maxRPM,
+              double encoderOffset
         ) {
             this.wheelPosition = wheelPosition;
             this.directionId = directionId;
@@ -68,6 +73,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
             this.radius = radius;
             this.maxRPM = maxRPM;
             this.wheelCircumference = (2 * Math.PI * radius);
+            this.encoderOffset = encoderOffset;
 
         }
 
@@ -92,10 +98,11 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     public static boolean rotateFirst = false;
 
-    public final TalonSRX directionMotor;
+    public final CANSparkMax directionMotor;
     public final Encoder encoder;
 
     private final CANSparkMax magnitudeMotor;
+    private final AbsoluteEncoder absoluteEncoder;
 
     private double targetAngle = 135, targetMagnitude = 0;
 
@@ -122,11 +129,12 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     ) {
         angleKey = "angle_key";
 
-        directionMotor = new TalonSRX(directionId);
+        directionMotor = new CANSparkMax(directionId, CANSparkMaxLowLevel.MotorType.kBrushless);
 
         encoder = new Encoder(encoderChannelA, encoderChannelB);
 
         magnitudeMotor = new CANSparkMax(magnitudeId, CANSparkMaxLowLevel.MotorType.kBrushless);
+        absoluteEncoder = magnitudeMotor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
 
         this.register();
 
@@ -144,6 +152,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         );
         position = motorPosition;
         angleKey = motorPosition.name() + "_Angle";
+        SmartDashboard.putNumber("Zero Offset " + motorPosition + ": ", absoluteEncoder.getZeroOffset());
+        SmartDashboard.putNumber("position " + motorPosition + ": ", absoluteEncoder.getPosition());
     }
 
     public void setMagnitude(double magnitude) {
@@ -184,11 +194,13 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     public void setDirectionPercent(double percent) {
-        directionMotor.set(TalonSRXControlMode.PercentOutput, percent);
+        directionMotor.set(percent);
     }
 
     public double getWheelAngle() {
-        double angle = -encoder.get() * 360 / ENCODER_COUNTS_PER_REVOLUTION;
+        //double percentTurned = -encoder.get() / ENCODER_COUNTS_PER_REVOLUTION;
+        double percentTurned = getWheelRotation();
+        double angle = percentTurned * 360;
 
         angle %= 360.0;
         if(angle < 0) angle += 360.0;
@@ -210,6 +222,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         updateMagnitude();
 
         updateRotation();
+        SmartDashboard.putNumber("Zero Offset " + position + ": ", absoluteEncoder.getZeroOffset());
+        SmartDashboard.putNumber("position " + position + ": ", absoluteEncoder.getPosition());
 
 //        SmartDashboard.putNumber(angleKey, getVelocity());
     }
@@ -266,7 +280,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     private void setDirectionMotor(double percent) {
         previousDirectionMotorPercent = percent;
-        directionMotor.set(ControlMode.PercentOutput, percent);
+        directionMotor.set(percent);
     }
 
     public MotorPosition getPosition() {
@@ -345,5 +359,9 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     @Override
     public String toString() {
         return "" + getVelocity();
+    }
+
+    private double getWheelRotation(){
+        return absoluteEncoder.getZeroOffset() * position.encoderOffset;
     }
 }
