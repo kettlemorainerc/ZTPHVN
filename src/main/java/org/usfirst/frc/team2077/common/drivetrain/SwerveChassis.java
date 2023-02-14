@@ -2,17 +2,19 @@ package org.usfirst.frc.team2077.common.drivetrain;
 
 
 import org.usfirst.frc.team2077.common.Clock;
+import org.usfirst.frc.team2077.common.HardwareRequirements;
 import org.usfirst.frc.team2077.common.WheelPosition;
 import org.usfirst.frc.team2077.common.math.AccelerationLimits;
 import org.usfirst.frc.team2077.common.sensor.AngleSensor;
+import org.usfirst.frc.team2077.math.SwerveMath;
+import org.usfirst.frc.team2077.math.SwerveTargetValues;
 import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 
 import java.util.Comparator;
 import java.util.EnumMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
-import static org.usfirst.frc.team2077.common.drivetrain.MecanumMath.VelocityDirection.*;
+import static org.usfirst.frc.team2077.common.VelocityDirection.*;
 
 public class SwerveChassis extends AbstractChassis<SwerveMotor> {
     private static final double WHEELBASE = 20.375; // inches
@@ -24,7 +26,7 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
     private final SwerveMath math;
     private final AngleSensor angleSensor;
 
-    private static EnumMap<WheelPosition, SwerveMotor> buildDriveTrain(RobotHardware<SwerveMotor, SwerveChassis> hardware) {
+    private static EnumMap<WheelPosition, SwerveMotor> buildDriveTrain(HardwareRequirements<SwerveMotor, SwerveChassis> hardware) {
         EnumMap<WheelPosition, SwerveMotor> map = new EnumMap<>(WheelPosition.class);
 
         for(WheelPosition p : WheelPosition.values()) {
@@ -34,7 +36,7 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
         return map;
     }
 
-    public SwerveChassis(RobotHardware<SwerveMotor, SwerveChassis> hardware, Supplier<Double> getSeconds) {
+    public SwerveChassis(HardwareRequirements<SwerveMotor, SwerveChassis> hardware, Supplier<Double> getSeconds) {
         super(buildDriveTrain(hardware), WHEELBASE, TRACK_WIDTH, WHEEL_RADIUS, getSeconds);
 //        super(buildDriveModule(pos -> hardware.getWheel(pos).motor), WHEELBASE, TRACK_WIDTH, WHEEL_RADIUS, getSeconds);
 //        rotationModules = buildDriveModule(hardware::getRotationModule);
@@ -42,7 +44,7 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
         math = new SwerveMath(WHEELBASE, TRACK_WIDTH);
 
         this.maximumRotation = 1;
-        this.maximumSpeed =  this.driveModule.values()
+        this.maximumSpeed =  this.driveModules.values()
                 .stream()
                 .map(DriveModuleIF::getMaximumSpeed)
                 .min(Comparator.naturalOrder())
@@ -51,7 +53,7 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
         this.minimumSpeed =  this.maximumSpeed * 0.1;
     }
 
-    public SwerveChassis(RobotHardware<SwerveMotor, SwerveChassis> hardware) {
+    public SwerveChassis(HardwareRequirements<SwerveMotor, SwerveChassis> hardware) {
         this(hardware, Clock::getSeconds);
     }
 
@@ -59,16 +61,16 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
     @Override
     protected void updatePosition() {
         velocitySet = getVelocityCalculated();
-        velocityMeasured = math.velocitiesForTargets(driveModule);
+        velocityMeasured = math.velocitiesForTargets(driveModules);
 
         positionSet.moveRelative(
-                velocitySet.get(NORTH) * timeSinceLastUpdate,
-                velocitySet.get(EAST) * timeSinceLastUpdate,
+                velocitySet.get(FORWARD) * timeSinceLastUpdate,
+                velocitySet.get(STRAFE) * timeSinceLastUpdate,
                 velocitySet.get(ROTATION) * timeSinceLastUpdate
         );
         positionMeasured.moveRelative(
-                velocityMeasured.get(NORTH) * timeSinceLastUpdate,
-                velocityMeasured.get(EAST) * timeSinceLastUpdate,
+                velocityMeasured.get(FORWARD) * timeSinceLastUpdate,
+                velocityMeasured.get(STRAFE) * timeSinceLastUpdate,
                 velocityMeasured.get(ROTATION) * timeSinceLastUpdate
         );
     }
@@ -76,10 +78,10 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
     public static WheelPosition LOGGED_POSITION = WheelPosition.FRONT_RIGHT;
     @Override
     protected void updateDriveModules() {
-        Map<WheelPosition, SwerveTargetValues> wheelTargets = math.targetsForVelocities(targetVelocity);
+        var wheelTargets = math.targetsForVelocities(targetVelocity);
 
         wheelTargets.forEach( (key, value) -> {
-            SwerveMotor motor = this.driveModule.get(key);
+            SwerveMotor motor = this.driveModules.get(key);
 
 //            if(key == LOGGED_POSITION && (sentinel = (sentinel + 1) % 25) == 0) {
 ////                System.out.println("[position=" + LOGGED_POSITION + "][targets=" + value + ']');
@@ -98,11 +100,11 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
 
     @Override
     public void setVelocity(double north, double east, AccelerationLimits accelerationLimits) {
-        targetVelocity.put(NORTH, north);
-        this.accelerationLimits.set(NORTH, accelerationLimits.get(NORTH));
+        targetVelocity.put(FORWARD, north);
+        this.accelerationLimits.set(FORWARD, accelerationLimits.get(FORWARD));
 
-        targetVelocity.put(EAST, east);
-        this.accelerationLimits.set(EAST, accelerationLimits.get(EAST));
+        targetVelocity.put(STRAFE, east);
+        this.accelerationLimits.set(STRAFE, accelerationLimits.get(STRAFE));
     }
 
     @Override
