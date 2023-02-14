@@ -1,15 +1,16 @@
 package org.usfirst.frc.team2077.command;
 
+import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import org.usfirst.frc.team2077.RobotHardware;
 import org.usfirst.frc.team2077.common.command.RepeatedCommand;
 
 public class ExtendArm extends RepeatedCommand {
-    private final Spark arm;
+    private final CANSparkMax arm;
     //TODO: right motor type?
 
     private final ArmDirection direction;
-    private final double speed = 0.2;
+    private final double speed;
 
 
     public enum ArmDirection{
@@ -24,9 +25,10 @@ public class ExtendArm extends RepeatedCommand {
         }
     }
 
-    public ExtendArm(RobotHardware hardware, ArmDirection direction){
+    public ExtendArm(RobotHardware hardware, ArmDirection direction, double speed){
         arm = hardware.arm;
         this.direction = direction;
+        this.speed = speed;
     }
 
     @Override

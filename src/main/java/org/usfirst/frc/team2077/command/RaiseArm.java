@@ -21,12 +21,13 @@ public class RaiseArm extends RepeatedCommand {
     }
 
     private final TalonSRX screw;
-    private final double motorSpeed = 0.20;
+    private final double motorSpeed;
     private PistonDirection direction;
 
-    public RaiseArm(RobotHardware hardware, PistonDirection direction){
+    public RaiseArm(RobotHardware hardware, PistonDirection direction, double motorSpeed){
         screw=hardware.piston;
         this.direction = direction;
+        this.motorSpeed = motorSpeed;
     }
 
     @Override
@@ -42,7 +43,7 @@ public class RaiseArm extends RepeatedCommand {
     }
 
     @Override
-    public void end(boolean interrupted) {
+    public void end(boolean interrupted){
         screw.set(ControlMode.PercentOutput, 0);
     }
 

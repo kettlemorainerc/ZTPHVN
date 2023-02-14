@@ -76,14 +76,14 @@ public class DriveStation {
         JoystickButton retractArm = new JoystickButton(secondary, 14);
 
 
-        new RaiseArm(hardware, RaiseArm.PistonDirection.UP).bind(pistonUp);
-        new RaiseArm(hardware, RaiseArm.PistonDirection.DOWN).bind(pistonDown);
+        new RaiseArm(hardware, RaiseArm.PistonDirection.UP, 0.2).bind(pistonUp);
+        new RaiseArm(hardware, RaiseArm.PistonDirection.DOWN, 0.2).bind(pistonDown);
 
-        new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN).bind(openClaw);
-        new CloseClaw(hardware, CloseClaw.ClawDirection.CLOSE).bind(closeClaw);
+        new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 0.2).bind(openClaw);
+        new CloseClaw(hardware, CloseClaw.ClawDirection.CLOSE, 0.2).bind(closeClaw);
 
-        new ExtendArm(hardware, ExtendArm.ArmDirection.EXTEND).bind(extendArm);
-        new ExtendArm(hardware, ExtendArm.ArmDirection.RETRACT).bind(retractArm);
+        new ExtendArm(hardware, ExtendArm.ArmDirection.EXTEND, 0.2).bind(extendArm);
+        new ExtendArm(hardware, ExtendArm.ArmDirection.RETRACT, 0.2).bind(retractArm);
     }
 
     /** Normal (silver/brighter) joystick that supports rotation */

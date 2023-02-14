@@ -12,7 +12,7 @@ public class CloseClaw extends RepeatedCommand {
     private ClawDirection direction;
 
     private final TalonSRX claw;
-    private final double speed = 0.2;
+    private final double speed;
 
     public enum ClawDirection{
         OPEN(1), CLOSE(-1);
@@ -25,9 +25,10 @@ public class CloseClaw extends RepeatedCommand {
         }
     }
 
-    public CloseClaw(RobotHardware hardware, ClawDirection direction){
+    public CloseClaw(RobotHardware hardware, ClawDirection direction, double speed ){
         this.direction = direction;
         claw = hardware.claw;
+        this.speed = speed;
     }
 
     @Override

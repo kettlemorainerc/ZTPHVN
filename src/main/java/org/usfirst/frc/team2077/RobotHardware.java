@@ -2,6 +2,7 @@ package org.usfirst.frc.team2077;
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Relay;
@@ -26,7 +27,7 @@ public class RobotHardware extends HardwareRequirements<SwerveMotor, SwerveChass
 
     public final TalonSRX piston = new TalonSRX(9);
 
-    public final Spark arm = new Spark(9);
+    public final CANSparkMax arm = new CANSparkMax(9, CANSparkMaxLowLevel.MotorType.kBrushless);
     public final TalonSRX claw = new TalonSRX(10);
     public final SwerveMotor northEast = new SwerveMotor(SwerveMotor.MotorPosition.FRONT_RIGHT);
     public final SwerveMotor northWest = new SwerveMotor(SwerveMotor.MotorPosition.FRONT_LEFT);
