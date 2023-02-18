@@ -18,8 +18,8 @@ import java.util.function.Supplier;
 import static org.usfirst.frc.team2077.common.VelocityDirection.*;
 
 public class SwerveChassis extends AbstractChassis<SwerveMotor> {
-    private static final double WHEELBASE = 25.5; // inches
-    private static final double TRACK_WIDTH = 20.375; // inches
+    private static final double WHEELBASE = 19.25; // inches
+    private static final double TRACK_WIDTH = 22.5; // inches
     private static final double WHEEL_RADIUS = 2.0; // inches
 
     //    private static final RotationMotor directionMotor = new RotationMotor();

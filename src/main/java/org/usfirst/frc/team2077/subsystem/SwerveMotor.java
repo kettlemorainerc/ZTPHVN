@@ -221,7 +221,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     @Override public void periodic() {
         updateMagnitude();
 
-        updateRotation();
+//        updateRotation();
+
         SmartDashboard.putNumber("Zero Offset " + position + ": ", absoluteEncoder.getZeroOffset());
         SmartDashboard.putNumber("position " + position + ": ", absoluteEncoder.getPosition());
 
