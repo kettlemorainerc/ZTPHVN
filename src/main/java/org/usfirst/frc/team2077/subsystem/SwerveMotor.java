@@ -31,13 +31,13 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     public enum MotorPosition {
         // MAX_RPM: 5800
-        FRONT_RIGHT(WheelPosition.FRONT_RIGHT, 7, 8, 7, 8, 13, 6.67, 2, 5800, 0),
+        FRONT_RIGHT(WheelPosition.FRONT_RIGHT, 7, 8, 7, 8, 13, 6.67, 2, 5800, 0.7355),
         // Max: 5600
-        FRONT_LEFT(WheelPosition.FRONT_LEFT, 1, 2, 1, 2, 10, 6.67, 2, 5600, 0),
+        FRONT_LEFT(WheelPosition.FRONT_LEFT, 1, 2, 1, 2, 10, 6.67, 2, 5800, 0.1638),
         // Max: 5700
-        BACK_RIGHT(WheelPosition.BACK_RIGHT, 5, 6, 5, 6, 11, 6.67, 2, 5700, 0),
+        BACK_RIGHT(WheelPosition.BACK_RIGHT, 5, 6, 5, 6, 11, 6.67, 2, 5800, 0.7581),
         // Max 5700,
-        BACK_LEFT(WheelPosition.BACK_LEFT, 3, 4, 3, 4, 12, 6.67, 2, 5700, 0);
+        BACK_LEFT(WheelPosition.BACK_LEFT, 3, 4, 3, 4, 12, 6.67, 2, 5700, 0.3882);
 
         private final WheelPosition wheelPosition;
         private final int directionId;
@@ -85,16 +85,10 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     }
 
-    private static final double Pvalue = 1.0;
-    private static final double Ivalue = 0.0;
-    private static final double Dvalue = 0.0;
-
-    private static final double deccelGuess = 1.0 / 30.0;
-
-    private static final double DEAD_ANGLE = 1;
+    private static final double DEAD_ANGLE = 2;
     private static final double SPEED_REDUCTION = 0.3;
 
-    private static final double ENCODER_COUNTS_PER_REVOLUTION = 497.0 * (5.0 / 6.0); // encoder counts multiplied by the gear ratio
+    private static final double MAX_DIRECTIONMOTOR_VELOCITY = 1000.0;
 
     public static boolean rotateFirst = false;
 
@@ -134,11 +128,14 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         encoder = new Encoder(encoderChannelA, encoderChannelB);
 
         magnitudeMotor = new CANSparkMax(magnitudeId, CANSparkMaxLowLevel.MotorType.kBrushless);
-        absoluteEncoder = magnitudeMotor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
+        absoluteEncoder = directionMotor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
 
         this.register();
 
         hallEffectSensor = new DigitalInput(hallEffectChannel);
+
+        SmartDashboard.putNumber("Maximum Percent in PID", 0.1);
+        SmartDashboard.putNumber("Slow Division in PID", -17);
 
     }
 
@@ -219,9 +216,10 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     boolean clockwiseToTarget;
 
     @Override public void periodic() {
+
         updateMagnitude();
 
-//        updateRotation();
+        updateRotation();
 
         SmartDashboard.putNumber("Zero Offset " + position + ": ", absoluteEncoder.getZeroOffset());
         SmartDashboard.putNumber("position " + position + ": ", absoluteEncoder.getPosition());
@@ -256,19 +254,29 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         double currentAngle = getWheelAngle();
         double angleDifference = getAngleDifference(currentAngle, targetAngle);
 
-        double speed = Math.signum(angleDifference);
+        SmartDashboard.putNumber("angleDiff" + position.wheelPosition, angleDifference);
 
-        double stoppingAngle = Math.abs(speed) / (2 * deccelGuess); // a =  1 / (2 * 15)
+//        double speed = Math.signum(angleDifference);
 
-        if (stoppingAngle > Math.abs(angleDifference)){
 
-            double rotationDirection = Math.signum(speed);
 
-            speed -= speed / (2 * Math.abs(angleDifference));
+        double angleDifferenceDividedByAConstant = angleDifference / -30.0;//SmartDashboard.getNumber("Slow Division in PID", -20);
 
-            speed = Math.min(Math.abs(speed), 0.1) * rotationDirection;
+        double speed = 2.0 / ( 1.0 + Math.pow(Math.E, angleDifferenceDividedByAConstant)) - 1.0;
 
-        }
+        speed *= 0.2;//SmartDashboard.getNumber("Maximum Percent in PID", -20);;
+
+        speed = Math.max(Math.abs(speed), 0.02) * Math.signum(speed);
+
+
+
+//        if(Math.abs(angleDifference) < 30) {
+//            speed = Math.signum(angleDifference) * 0.1;
+////            speed = angleDifference / 300;//Math.pow(2, Math.floor(Math.abs(angleDifference)));
+////
+////            speed = Math.max(Math.abs(speed), 0.02) * Math.signum(speed);
+//        }
+
 //        if(Math.abs(angleDifference) < 15) {
 //            speed = angleDifference / 30; // Math.pow(2, Math.abs(angleDifference));
 //
@@ -280,7 +288,9 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     private void setDirectionMotor(double percent) {
-        previousDirectionMotorPercent = percent;
+//        previousDirectionMotorPercent = percent;
+        SmartDashboard.putNumber("percentPower" + position.wheelPosition, percent);
+
         directionMotor.set(percent);
     }
 
@@ -363,6 +373,6 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     private double getWheelRotation(){
-        return absoluteEncoder.getZeroOffset() * position.encoderOffset;
+        return absoluteEncoder.getPosition() - position.encoderOffset + 0.5;
     }
 }

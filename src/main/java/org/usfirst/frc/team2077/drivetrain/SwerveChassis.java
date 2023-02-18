@@ -2,6 +2,7 @@ package org.usfirst.frc.team2077.drivetrain;
 
 import org.usfirst.frc.team2077.common.Clock;
 import org.usfirst.frc.team2077.common.HardwareRequirements;
+import org.usfirst.frc.team2077.common.VelocityDirection;
 import org.usfirst.frc.team2077.common.WheelPosition;
 import org.usfirst.frc.team2077.common.drivetrain.AbstractChassis;
 import org.usfirst.frc.team2077.common.math.AccelerationLimits;
@@ -107,9 +108,11 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
 
         System.out.printf("[target rotate=%s]", targetVelocity.get(ROTATION));
         wheelTargets.forEach((key, value) -> {
+
             SwerveMotor motor = this.driveModules.get(key);
 
             motor.setTargetAngle(value.getAngle());
+
             double targetVelocity = value.getMagnitude() * maximumSpeed;
             if(Math.abs(value.getMagnitude()) > 0.0001) {
                 targetVelocity = Math.max(targetVelocity, minimumSpeed);
