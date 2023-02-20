@@ -7,7 +7,6 @@ import org.usfirst.frc.team2077.common.command.RepeatedCommand;
 
 public class ExtendArm extends RepeatedCommand {
     private final CANSparkMax arm;
-    //TODO: right motor type?
 
     private final ArmDirection direction;
     private final double speed;

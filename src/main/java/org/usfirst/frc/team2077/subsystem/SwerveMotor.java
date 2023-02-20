@@ -85,8 +85,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     }
 
-    private static final double DEAD_ANGLE = 2;
-    private static final double SPEED_REDUCTION = 0.3;
+    private static final double DEAD_ANGLE = 3;
+    private static final double SPEED_REDUCTION = 0.6;
 
     private static final double MAX_DIRECTIONMOTOR_VELOCITY = 1000.0;
 
@@ -163,7 +163,9 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     @Override public void setTargetMagnitude(double magnitude) {
 //        if(this.position == MotorPosition.BACK_RIGHT && magnitude > 0) System.out.printf("[target magnitude=%s]%n", magnitude);
+        if(magnitude == 0) setTargetAngle(0);
         this.targetMagnitude = magnitude;
+
     }
 
     public void setTargetAngle(double angle) {
@@ -246,10 +248,10 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     private void updateRotation() {
-        if (this.targetMagnitude == 0) {
-            setDirectionMotor(0);
-            return;
-        }
+//        if (/*this.targetMagnitude == 0 && */!rotateFirst) {
+//            setDirectionMotor(0);
+//            return;
+//        }
 
         double currentAngle = getWheelAngle();
         double angleDifference = getAngleDifference(currentAngle, targetAngle);
@@ -258,17 +260,13 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
 //        double speed = Math.signum(angleDifference);
 
-
-
-        double angleDifferenceDividedByAConstant = angleDifference / -30.0;//SmartDashboard.getNumber("Slow Division in PID", -20);
+        double angleDifferenceDividedByAConstant = angleDifference / -50.0;//SmartDashboard.getNumber("Slow Division in PID", -20);
 
         double speed = 2.0 / ( 1.0 + Math.pow(Math.E, angleDifferenceDividedByAConstant)) - 1.0;
 
-        speed *= 0.2;//SmartDashboard.getNumber("Maximum Percent in PID", -20);;
+        speed *= 0.5;//SmartDashboard.getNumber("Maximum Percent in PID", -20);;
 
-        speed = Math.max(Math.abs(speed), 0.02) * Math.signum(speed);
-
-
+        speed = Math.max(Math.abs(speed), 0.05) * Math.signum(speed);
 
 //        if(Math.abs(angleDifference) < 30) {
 //            speed = Math.signum(angleDifference) * 0.1;

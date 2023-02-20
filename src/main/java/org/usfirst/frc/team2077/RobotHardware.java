@@ -25,7 +25,7 @@ public class RobotHardware extends HardwareRequirements<SwerveMotor, SwerveChass
         return instance;
     }
 
-    public final TalonSRX piston = new TalonSRX(9);
+    public final TalonSRX piston = new TalonSRX(11);
 
     public final CANSparkMax arm = new CANSparkMax(9, CANSparkMaxLowLevel.MotorType.kBrushless);
     public final TalonSRX claw = new TalonSRX(10);

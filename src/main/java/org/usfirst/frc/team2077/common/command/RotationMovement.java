@@ -1,5 +1,6 @@
 package org.usfirst.frc.team2077.common.command;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
 import org.usfirst.frc.team2077.common.*;
 import org.usfirst.frc.team2077.common.control.DriveStick;
@@ -17,7 +18,7 @@ public class RotationMovement extends CommandBase {
     }
 
     @Override public void execute() {
-        chassis.setRotationPercent(stick.getRotation());
+        if(DriverStation.isTeleop()) chassis.setRotationPercent(stick.getRotation());
     }
 
     @Override

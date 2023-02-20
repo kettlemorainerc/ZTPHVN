@@ -2,6 +2,8 @@ package org.usfirst.frc.team2077;
 
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.*;
+import org.usfirst.frc.team2077.common.command.autonomous.AutonomousMove;
+import org.usfirst.frc.team2077.common.command.autonomous.AutonomousRotate;
 
 public class Robot extends TimedRobot {
     private RobotHardware hardware;
@@ -20,20 +22,23 @@ public class Robot extends TimedRobot {
      * When you click the "Autonomous" option in driver station
      */
     @Override public void autonomousInit() {
+        AutonomousMove move = new AutonomousMove(hardware,50, 0);
 
+        move.schedule();
     }
 
     /**
      * When you click the "Teleoperated" option in driver station
      */
     @Override public void teleopInit() {
-
     }
 
     /**
      * Called roughly every 1/50th second while the robot is "enabled" in "Autonomous" mode
      */
-    @Override public void autonomousPeriodic() {}
+
+    @Override public void autonomousPeriodic() {
+    }
 
     /**
      * Called roughly every 1/50th second while the robot is "enabled" in "Teleoperated" mode

@@ -33,7 +33,6 @@ public class RaiseArm extends RepeatedCommand {
     @Override
     public void initialize() {
         screw.set(ControlMode.PercentOutput, motorSpeed * direction.getDirection());
-
     }
 
 

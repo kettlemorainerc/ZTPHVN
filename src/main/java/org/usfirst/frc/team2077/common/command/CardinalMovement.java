@@ -5,6 +5,7 @@
 
 package org.usfirst.frc.team2077.common.command;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
 import org.usfirst.frc.team2077.common.*;
 import org.usfirst.frc.team2077.common.control.DriveStick;
@@ -33,7 +34,7 @@ public class CardinalMovement extends CommandBase {
 //		north = Math.abs(north) >= Math.abs(east) ? north : 0;
 //		east = Math.abs(east) > Math.abs(north) ? east : 0;
 
-        chassis.setVelocityPercent(north, east);
+        if(DriverStation.isTeleop()) chassis.setVelocityPercent(north, east);
     }
 
     @Override public void end(boolean interrupted) {

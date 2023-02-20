@@ -56,6 +56,14 @@ public class DriveStation {
         hardware.getPosition().setDefaultCommand(new CardinalMovement(hardware, driveStick));
         hardware.getHeading().setDefaultCommand(new RotationMovement(hardware, driveStick));
 
+        useCommand(technicalStick,12, new RaiseArm(hardware, RaiseArm.PistonDirection.UP,0.2));
+        useCommand(technicalStick,16, new RaiseArm(hardware, RaiseArm.PistonDirection.DOWN,0.2));
+        useCommand(technicalStick,11, new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 1));
+        useCommand(technicalStick,15, new CloseClaw(hardware, CloseClaw.ClawDirection.CLOSE, 1));
+        //useCommand(technicalStick, 11, new CloseClaw(hardware, 0.2));
+        useCommand(technicalStick, 10, new ExtendArm(hardware, ExtendArm.ArmDirection.EXTEND, 0.1));
+        useCommand(technicalStick, 14, new ExtendArm(hardware, ExtendArm.ArmDirection.RETRACT, 0.1));
+
         bindDriverControl(hardware, driveStick);
         bindTechnicalControl(hardware, technicalStick);
     }
@@ -66,24 +74,6 @@ public class DriveStation {
 
     /** Bind technical driver button commands here */
     private void bindTechnicalControl(RobotHardware hardware, Joystick secondary) {
-        JoystickButton pistonUp = new JoystickButton(secondary, 12);
-        JoystickButton pistonDown = new JoystickButton(secondary, 16);
-
-        JoystickButton openClaw = new JoystickButton(secondary, 11);
-        JoystickButton closeClaw = new JoystickButton(secondary, 15);
-
-        JoystickButton extendArm = new JoystickButton(secondary, 10);
-        JoystickButton retractArm = new JoystickButton(secondary, 14);
-
-
-        new RaiseArm(hardware, RaiseArm.PistonDirection.UP, 0.2).bind(pistonUp);
-        new RaiseArm(hardware, RaiseArm.PistonDirection.DOWN, 0.2).bind(pistonDown);
-
-        new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 0.2).bind(openClaw);
-        new CloseClaw(hardware, CloseClaw.ClawDirection.CLOSE, 0.2).bind(closeClaw);
-
-        new ExtendArm(hardware, ExtendArm.ArmDirection.EXTEND, 0.2).bind(extendArm);
-        new ExtendArm(hardware, ExtendArm.ArmDirection.RETRACT, 0.2).bind(retractArm);
     }
 
     /** Normal (silver/brighter) joystick that supports rotation */
