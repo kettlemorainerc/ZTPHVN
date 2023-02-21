@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj2.command.button.*;
 import org.usfirst.frc.team2077.command.ExtendArm;
 import org.usfirst.frc.team2077.command.CloseClaw;
 import org.usfirst.frc.team2077.command.RaiseArm;
+import org.usfirst.frc.team2077.command.RotateWheel;
+import org.usfirst.frc.team2077.common.WheelPosition;
 import org.usfirst.frc.team2077.common.command.*;
 import org.usfirst.frc.team2077.common.control.DriveJoystick;
 import org.usfirst.frc.team2077.common.control.DriveStick;
@@ -56,14 +58,6 @@ public class DriveStation {
         hardware.getPosition().setDefaultCommand(new CardinalMovement(hardware, driveStick));
         hardware.getHeading().setDefaultCommand(new RotationMovement(hardware, driveStick));
 
-        useCommand(technicalStick,12, new RaiseArm(hardware, RaiseArm.PistonDirection.UP,0.2));
-        useCommand(technicalStick,16, new RaiseArm(hardware, RaiseArm.PistonDirection.DOWN,0.2));
-        useCommand(technicalStick,11, new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 1));
-        useCommand(technicalStick,15, new CloseClaw(hardware, CloseClaw.ClawDirection.CLOSE, 1));
-        //useCommand(technicalStick, 11, new CloseClaw(hardware, 0.2));
-        useCommand(technicalStick, 10, new ExtendArm(hardware, ExtendArm.ArmDirection.EXTEND, 0.1));
-        useCommand(technicalStick, 14, new ExtendArm(hardware, ExtendArm.ArmDirection.RETRACT, 0.1));
-
         bindDriverControl(hardware, driveStick);
         bindTechnicalControl(hardware, technicalStick);
     }
@@ -74,6 +68,19 @@ public class DriveStation {
 
     /** Bind technical driver button commands here */
     private void bindTechnicalControl(RobotHardware hardware, Joystick secondary) {
+
+        useCommand(secondary,12, new RaiseArm(hardware, RaiseArm.PistonDirection.UP,0.2));
+        useCommand(secondary,16, new RaiseArm(hardware, RaiseArm.PistonDirection.DOWN,0.2));
+        useCommand(secondary,11, new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 1));
+        useCommand(secondary,15, new CloseClaw(hardware, CloseClaw.ClawDirection.CLOSE, 1));
+        //useCommand(secondary, 11, new CloseClaw(hardware, 0.2));
+        useCommand(secondary, 10, new ExtendArm(hardware, ExtendArm.ArmDirection.EXTEND, 0.1));
+        useCommand(secondary, 14, new ExtendArm(hardware, ExtendArm.ArmDirection.RETRACT, 0.1));
+
+//        useCommand(secondary, 1, new RotateWheel(hardware.getWheel(WheelPosition.FRONT_LEFT)));
+//        useCommand(secondary, 5, new RotateWheel(hardware.getWheel(WheelPosition.BACK_LEFT)));
+//        useCommand(secondary, 2, new RotateWheel(hardware.getWheel(WheelPosition.FRONT_RIGHT)));
+//        useCommand(secondary, 6, new RotateWheel(hardware.getWheel(WheelPosition.BACK_RIGHT)));
     }
 
     /** Normal (silver/brighter) joystick that supports rotation */
