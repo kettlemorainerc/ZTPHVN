@@ -268,18 +268,33 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
         speed = Math.max(Math.abs(speed), 0.05) * Math.signum(speed);
 
-//        if(Math.abs(angleDifference) < 30) {
-//            speed = Math.signum(angleDifference) * 0.1;
-////            speed = angleDifference / 300;//Math.pow(2, Math.floor(Math.abs(angleDifference)));
-////
-////            speed = Math.max(Math.abs(speed), 0.02) * Math.signum(speed);
-//        }
+        /*
 
-//        if(Math.abs(angleDifference) < 15) {
-//            speed = angleDifference / 30; // Math.pow(2, Math.abs(angleDifference));
-//
-//
-//        }
+        double dt = ...;
+
+        double prevAngleDiff = ...;
+        double currAngleDiff = ...;
+
+        //double predNextAngleDiff = 2 * currAngleDiff - prevAngleDiff;
+
+        double speed = (currAngleDiff - prevAngleDiff) / dt;
+        double nextSpeed = speed;
+
+        double AngleDiffNextSecond = currAngleDiff + speed;
+
+        //if overshoot then reduce speed
+        if(Math.abs(speed) > Math.abs(currAngleDiff)) {
+
+            double accel = speed * speed / (2 * currAngleDiff);
+
+            nextSpeed = speed - accel;
+
+        }
+
+        //set speed: nextSpeed * dt
+
+        */
+
         if(Math.abs(angleDifference) < DEAD_ANGLE) speed = 0.0;
 
         setDirectionMotor(speed);

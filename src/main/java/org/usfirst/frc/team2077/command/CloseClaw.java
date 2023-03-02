@@ -35,6 +35,7 @@ public class CloseClaw extends RepeatedCommand {
     @Override
     public void initialize() {
         claw.set(TalonSRXControlMode.PercentOutput,speed * direction.getDirection());
+
     }
 
     @Override

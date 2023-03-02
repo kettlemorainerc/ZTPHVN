@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.button.*;
 import org.usfirst.frc.team2077.command.ExtendArm;
 import org.usfirst.frc.team2077.command.CloseClaw;
+import org.usfirst.frc.team2077.command.OpenClaw;
 import org.usfirst.frc.team2077.command.RaiseArm;
 import org.usfirst.frc.team2077.common.command.*;
 import org.usfirst.frc.team2077.common.control.DriveJoystick;
@@ -58,9 +59,9 @@ public class DriveStation {
 
         useCommand(technicalStick,12, new RaiseArm(hardware, RaiseArm.PistonDirection.UP,0.2));
         useCommand(technicalStick,16, new RaiseArm(hardware, RaiseArm.PistonDirection.DOWN,0.2));
-        useCommand(technicalStick,11, new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 1));
+        //useCommand(technicalStick,11, new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 1));
         useCommand(technicalStick,15, new CloseClaw(hardware, CloseClaw.ClawDirection.CLOSE, 1));
-        //useCommand(technicalStick, 11, new CloseClaw(hardware, 0.2));
+        useCommand(technicalStick, 15, new OpenClaw(hardware, 1));
         useCommand(technicalStick, 10, new ExtendArm(hardware, ExtendArm.ArmDirection.EXTEND, 0.1));
         useCommand(technicalStick, 14, new ExtendArm(hardware, ExtendArm.ArmDirection.RETRACT, 0.1));
 

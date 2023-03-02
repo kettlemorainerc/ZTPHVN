@@ -7,7 +7,7 @@ import org.usfirst.frc.team2077.RobotHardware;
 import org.usfirst.frc.team2077.common.command.RepeatedCommand;
 import org.usfirst.frc.team2077.common.command.SelfDefinedCommand;
 
-public class OpenClaw extends SelfDefinedCommand {
+public class OpenClaw extends RepeatedCommand {
 
     private final TalonSRX claw;
     private final double speed;
@@ -17,19 +17,15 @@ public class OpenClaw extends SelfDefinedCommand {
         this.speed = speed;
     }
 
-    @Override
-    public boolean isFinished() {
-        return finished;
-    }
+
 
     @Override
     public void initialize() {
-        finished = false;
+        claw.set(TalonSRXControlMode.PercentOutput, speed);
     }
 
     @Override
     public void execute() {
-        claw.set(TalonSRXControlMode.PercentOutput, speed);
     }
 
     @Override
@@ -39,6 +35,6 @@ public class OpenClaw extends SelfDefinedCommand {
 
     @Override
     public void bind(JoystickButton button){
-        button.onFalse(this);
+        button.whileFalse(this);
     }
 }

@@ -106,7 +106,7 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
               maximumRotation
         );
 
-        System.out.printf("[targetVelocity=%s]", targetVelocity);
+        //System.out.printf("[targetVelocity=%s]", targetVelocity);
         wheelTargets.forEach((key, value) -> {
 
             SwerveMotor motor = this.driveModules.get(key);
@@ -120,7 +120,7 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
             motor.setVelocity(targetVelocity);
 //            System.out.printf("[%s mag=%s]", key, value.getMagnitude());
         });
-        System.out.println();
+        //System.out.println();
     }
 
     @Override public void setVelocity(
