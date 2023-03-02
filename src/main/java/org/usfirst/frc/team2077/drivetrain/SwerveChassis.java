@@ -51,13 +51,13 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
               .stream()
               .map(e -> {
                   Double max = e.getMaximumSpeed();
-                  System.out.printf("[%s=%s]", e.getPosition(), max);
+//                  System.out.printf("[%s=%s]", e.getPosition(), max);
                   return max;
               })
               .min(Comparator.naturalOrder())
               .orElseThrow();
         ;
-        System.out.println();
+//        System.out.println();
 
         Map<WheelPosition, SwerveTargetValues> wheelTargets = math.targetsForVelocities(Map.of(
               FORWARD,
@@ -106,8 +106,10 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
               maximumRotation
         );
 
-        //System.out.printf("[targetVelocity=%s]", targetVelocity);
+
         wheelTargets.forEach((key, value) -> {
+
+//            if(key != WheelPosition.FRONT_LEFT) return;
 
             SwerveMotor motor = this.driveModules.get(key);
 
@@ -120,7 +122,7 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
             motor.setVelocity(targetVelocity);
 //            System.out.printf("[%s mag=%s]", key, value.getMagnitude());
         });
-        //System.out.println();
+
     }
 
     @Override public void setVelocity(

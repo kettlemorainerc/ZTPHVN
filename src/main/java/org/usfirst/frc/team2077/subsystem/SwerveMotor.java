@@ -17,6 +17,7 @@ import org.usfirst.frc.team2077.common.WheelPosition;
 import org.usfirst.frc.team2077.common.drivetrain.DriveModuleIF;
 import org.usfirst.frc.team2077.common.subsystem.CANLineSubsystem;
 import org.usfirst.frc.team2077.drivetrain.SwerveModule;
+import org.usfirst.frc.team2077.util.SmartDashNumber;
 
 public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
@@ -31,12 +32,16 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     public enum MotorPosition {
         // MAX_RPM: 5800
+        // MIN PERCENT .0105
         FRONT_RIGHT(WheelPosition.FRONT_RIGHT, 7, 8, 7, 8, 13, 6.67, 2, 5800, 0.7355),
         // Max: 5600
+        // MIN PERCENT: 0.02
         FRONT_LEFT(WheelPosition.FRONT_LEFT, 1, 2, 1, 2, 10, 6.67, 2, 5800, 0.1638),
         // Max: 5700
+        // MIN PERCENT: 0.02
         BACK_RIGHT(WheelPosition.BACK_RIGHT, 5, 6, 5, 6, 11, 6.67, 2, 5800, 0.7581),
         // Max 5700,
+        // MIN_PERCENT: 0.0305
         BACK_LEFT(WheelPosition.BACK_LEFT, 3, 4, 3, 4, 12, 6.67, 2, 5700, 0.3882);
 
         private final WheelPosition wheelPosition;
@@ -87,6 +92,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     private static final double DEAD_ANGLE = 3;
     private static final double SPEED_REDUCTION = 0.6;
+    private static final double MIN_ROTATE_PERCENT = 0.0305;
+    private static final double MAX_ROTATE_PERCENT = 1;
 
     private static final double MAX_DIRECTIONMOTOR_VELOCITY = 1000.0;
 
@@ -134,8 +141,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
         hallEffectSensor = new DigitalInput(hallEffectChannel);
 
-        SmartDashboard.putNumber("Maximum Percent in PID", 0.1);
-        SmartDashboard.putNumber("Slow Division in PID", -17);
+//        SmartDashboard.putNumber("Maximum Percent in PID", 0.1);
+//        SmartDashboard.putNumber("Slow Division in PID", -17);
 
     }
 
@@ -193,7 +200,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     public void setDirectionPercent(double percent) {
-        directionMotor.set(percent);
+        setDirectionMotor(percent);
     }
 
     public double getWheelAngle() {
@@ -218,7 +225,6 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     boolean clockwiseToTarget;
 
     @Override public void periodic() {
-
         updateMagnitude();
 
         updateRotation();
@@ -229,11 +235,15 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 //        SmartDashboard.putNumber(angleKey, getVelocity());
     }
 
+    private void setMagnitudePercent(double pct) {
+        this.magnitudeMotor.set(pct);
+    }
+
     private void updateMagnitude() {
 
         if(rotateFirst){
 //             if(Math.abs(getAngleDifference(targetAngle, getWheelAngle())) > DEAD_ANGLE) {
-            magnitudeMotor.set(0);
+            setMagnitudePercent(0);
             System.out.println("waiting for angle");
 //            }
             return;
@@ -243,9 +253,13 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
         if(flipMagnitude) magnitude *= -1;
 
-        magnitudeMotor.set(magnitude);
+
+        setMagnitudePercent(magnitude);
 
     }
+
+    private static final SmartDashNumber SLOW_DIVISION = new SmartDashNumber("Slow Division in PID", -20, true);
+    private static final SmartDashNumber MAX_PERCENT = new SmartDashNumber("Maximum Percent in PID", .3, true);
 
     private void updateRotation() {
 //        if (/*this.targetMagnitude == 0 && */!rotateFirst) {
@@ -260,13 +274,19 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
 //        double speed = Math.signum(angleDifference);
 
-        double angleDifferenceDividedByAConstant = angleDifference / -50.0;//SmartDashboard.getNumber("Slow Division in PID", -20);
+        double angleDifferenceDividedByAConstant = angleDifference / SLOW_DIVISION.get().doubleValue();
 
         double speed = 2.0 / ( 1.0 + Math.pow(Math.E, angleDifferenceDividedByAConstant)) - 1.0;
 
-        speed *= 0.5;//SmartDashboard.getNumber("Maximum Percent in PID", -20);;
+        speed *= MAX_PERCENT.get().doubleValue();
 
-        speed = Math.max(Math.abs(speed), 0.05) * Math.signum(speed);
+        speed = Math.max(Math.min(Math.abs(speed), MAX_ROTATE_PERCENT), MIN_ROTATE_PERCENT) * Math.signum(speed);
+
+//        System.out.println(SmartDashboard.getNumber("Maximum Percent in PID", -0.1));
+
+
+
+//        speed = 0;
 
         /*
 
