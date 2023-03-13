@@ -7,6 +7,10 @@ import org.usfirst.frc.team2077.common.subsystem.InputMap;
 
 public class Claw implements Subsystem {
 
+    public enum Input{
+        CLOSE;
+    }
+
     private final static double maxSpeed = 0.8;
 
     private TalonSRX motor = new TalonSRX(11);
@@ -16,10 +20,10 @@ public class Claw implements Subsystem {
     }
 
     @Override public void periodic() {
-        double openPercent = InputMap.getInput("Open");
-        double closePercent = InputMap.getInput("Close");
+//        double openPercent = InputMap.getInput("Open");
+        double closePercent = InputMap.getInput(Input.CLOSE);
 
-        double percent = openPercent - closePercent;
+        double percent = closePercent;
 
         setMotor(percent);
     }

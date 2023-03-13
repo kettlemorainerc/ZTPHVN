@@ -12,6 +12,8 @@ import org.usfirst.frc.team2077.common.control.DriveJoystick;
 import org.usfirst.frc.team2077.common.control.DriveStick;
 import org.usfirst.frc.team2077.common.control.DriveXboxController;
 import org.usfirst.frc.team2077.common.subsystem.InputMap;
+import org.usfirst.frc.team2077.subsystem.Claw;
+import org.usfirst.frc.team2077.subsystem.ScissorArm;
 
 /**
  * This class is intended to be the center point of defining actions that can be utilized during teleop segments of
@@ -76,11 +78,11 @@ public class DriveStation {
     /** Bind technical driver button commands here */
     private void bindTechnicalControl(RobotHardware hardware, DriveXboxController secondary) {
 
-        InputMap.bindAxis("Close", secondary::getRightTriggerAxis);
-        InputMap.bindAxis("Open", secondary::getLeftTriggerAxis);
+        InputMap.bindAxis(Claw.Input.CLOSE, secondary::getRightTriggerAxis);
+//        InputMap.bindAxis("Open", secondary::getLeftTriggerAxis);
 
-        InputMap.bindAxis("Extend", secondary::getLeftY);
-        InputMap.bindAxis("Pivot", secondary::getRightY);
+        InputMap.bindAxis(ScissorArm.Input.EXTEND, secondary::getLeftY);
+//        InputMap.bindAxis("Pivot", secondary::getRightY);
 
         // Claw open directions: top row on num pad, it is a scale of --, -. +, ++ where +- is direction and the number is speed
 //        useCommand(secondary,1, new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 0.4));

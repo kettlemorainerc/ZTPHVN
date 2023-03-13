@@ -9,6 +9,10 @@ import org.usfirst.frc.team2077.common.subsystem.InputMap;
 
 public class ScissorArm implements Subsystem {
 
+    public enum Input{
+        EXTEND;
+    }
+
     private static final double PIVOT_MAX_SPEED = 0.5;
     private static final double EXTEND_MAX_SPEED = 0.5;
 
@@ -23,13 +27,13 @@ public class ScissorArm implements Subsystem {
     }
 
     @Override public void periodic() {
-        double extendPercent = -InputMap.getInput("Extend"); //These are backwards of how we think they should be
-        double pivotPercent = -InputMap.getInput("Pivot");
+        double extendPercent = -InputMap.getInput(Input.EXTEND); //These are backwards of how we think they should be
+//        double pivotPercent = -InputMap.getInput("Pivot");
 
 //        double appliedVoltage = extensionMotor.getBusVoltage();
 
         setExtensionMotor(extendPercent);
-        setPivotMotor(pivotPercent);
+//        setPivotMotor(pivotPercent);
     }
 
     private void setExtensionMotor(double percent){
