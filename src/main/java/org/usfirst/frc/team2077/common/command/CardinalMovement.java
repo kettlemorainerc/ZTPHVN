@@ -30,6 +30,8 @@ public class CardinalMovement extends CommandBase {
         double north = -stick.getNorth();
         double east = stick.getEast();
 
+        double POV = stick.getPOV();
+
         // Tank drive
 //		north = Math.abs(north) >= Math.abs(east) ? north : 0;
 //		east = Math.abs(east) > Math.abs(north) ? east : 0;
