@@ -6,6 +6,10 @@ plugins {
     id "idea"
 }
 
+repositories {
+    mavenLocal()
+}
+
 def javaVersion = JavaVersion.VERSION_17
 sourceCompatibility = javaVersion
 targetCompatibility = javaVersion
@@ -111,4 +115,41 @@ idea {
         downloadJavadoc = true
         downloadSources = true
     }
+}
+
+task downloadDepsToLocal(type: Copy) {
+    doLast {
+        logger.lifecycle ""
+    }
+    logger.lifecycle "${configurations}"
+    from configurations.compileClasspath
+    from configurations.runtimeClasspath
+    from configurations.roborioRelease
+    from configurations.roborioDebug
+    from configurations.nativeRelease
+    from configurations.nativeDebug
+    from configurations.simulationRelease
+    from configurations.simulationDebug
+    from configurations.jrefrcJavafrcjre
+    from configurations.testRuntimeClasspath
+    from configurations.testCompileClasspath
+
+    into file(repositories.mavenLocal().url)
+    eachFile {
+        def parts = it.path.split("/");
+        if(parts.size() != 4) {
+            def sep = File.separator == "\\" ? "\\\\" : File.separator
+            def path = "${it}".split("files-2\\.1${sep}")[1];
+            path = path.substring(0, path.length() -1)
+            parts = path.split(sep)
+            logger.lifecycle("${it.path} => $parts");
+        }
+
+        if(parts.size() == 5) {
+            it.path = [parts[0].replace('.', '/'), parts[1], parts[2], parts[4]].join("/")
+        } else {
+            logger.lifecycle("${it}\n${it.path}\n${it.relativeSourcePath}")
+        }
+    }
+    includeEmptyDirs = false
 }
