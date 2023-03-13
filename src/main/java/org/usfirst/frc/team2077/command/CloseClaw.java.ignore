@@ -2,9 +2,7 @@ package org.usfirst.frc.team2077.command;
 
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj.DigitalInput;
 import org.usfirst.frc.team2077.RobotHardware;
 import org.usfirst.frc.team2077.common.command.RepeatedCommand;
 
@@ -12,34 +10,48 @@ public class CloseClaw extends RepeatedCommand {
 
     private ClawDirection direction;
 
+//    private final DigitalInput limitSwitch;
     private final TalonSRX claw;
     private final double speed;
 
     public enum ClawDirection{
-        OPEN(1), CLOSE(-1);
-        private final int direction;
-        ClawDirection(int direction){
-            this.direction = direction;
-        }
-        public int getDirection(){
-            return direction;
+        OPEN(1, 0), //TODO, confirm ports
+        CLOSE(-1, 1);
+
+        private final int motorDirection;
+        private final int limitSwitchDIOport;
+
+        ClawDirection(int direction, int port){
+            motorDirection = direction;
+            limitSwitchDIOport = port;
         }
     }
 
     public CloseClaw(RobotHardware hardware, ClawDirection direction, double speed ){
         this.direction = direction;
-        claw = hardware.claw;
         this.speed = speed;
+
+//        limitSwitch = new DigitalInput(direction.limitSwitchDIOport);
+        claw = hardware.claw;
     }
 
     @Override
     public void initialize() {
-        claw.set(TalonSRXControlMode.PercentOutput,speed * direction.getDirection());
-
+        claw.set(
+            TalonSRXControlMode.PercentOutput,
+            speed * direction.motorDirection
+        );
     }
 
     @Override
     public void execute() {
+
+        //Stopping the motor from going further if it's hitting its limit switch
+//        if(limitSwitch.get()){
+//            claw.set(TalonSRXControlMode.PercentOutput, 0);
+//            end(false);
+//        }
+
     }
 
     @Override

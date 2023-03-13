@@ -33,7 +33,7 @@ public class SmartDashNumber implements SmartDashValue<Number> {
         );
         table.addListener(key, events, (networkTable, tableKey, event) -> {
             this.value = event.valueData.value.getDouble();
-            System.out.println("Updating " + tableKey + ": " + value);
+//            System.out.println("Updating " + tableKey + ": " + value);
 
         });
     }

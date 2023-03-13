@@ -7,16 +7,11 @@ package org.usfirst.frc.team2077;
 
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.button.*;
-import org.usfirst.frc.team2077.command.ExtendArm;
-import org.usfirst.frc.team2077.command.CloseClaw;
-import org.usfirst.frc.team2077.command.OpenClaw;
-import org.usfirst.frc.team2077.command.RaiseArm;
-import org.usfirst.frc.team2077.command.RotateWheel;
-import org.usfirst.frc.team2077.common.WheelPosition;
 import org.usfirst.frc.team2077.common.command.*;
 import org.usfirst.frc.team2077.common.control.DriveJoystick;
 import org.usfirst.frc.team2077.common.control.DriveStick;
 import org.usfirst.frc.team2077.common.control.DriveXboxController;
+import org.usfirst.frc.team2077.common.subsystem.InputMap;
 
 /**
  * This class is intended to be the center point of defining actions that can be utilized during teleop segments of
@@ -30,22 +25,24 @@ public class DriveStation {
     private static final int DRIVE_XBOX_PORT = 1;
     private static final int FLYSKY_PORT = 2;
 
+    private static final int TECHNICAL_XBOX_PORT = 2;
+
     // Joysticks that do not support rotation
     private static final int TECHNICAL_JOYSTICK_PORT = 4;
     private static final int NUMPAD_PORT = 5;
 
-    private final DriveStick driveStick;
-    private final Joystick technicalStick;
+    private final DriveXboxController driveStick;
+    private final DriveXboxController technicalStick;
 
     public DriveStation(RobotHardware hardware) {
         /** Set the driver's control method this MUST be a {@link DriveStick} implementation */
 //        driveStick = getFlysky();
 //        driveStick = getJoystick();
-        driveStick = getXbox();
+        driveStick = getXbox(DRIVE_XBOX_PORT);
 
         /** Set the technical control method. This can be any {@link Joystick} implementation */
 //        technicalStick = getTechnicalJoystick();
-        technicalStick = getNumpad();
+        technicalStick = getXbox(TECHNICAL_XBOX_PORT);
 
         bind(hardware);
     }
@@ -59,32 +56,45 @@ public class DriveStation {
         hardware.getPosition().setDefaultCommand(new CardinalMovement(hardware, driveStick));
         hardware.getHeading().setDefaultCommand(new RotationMovement(hardware, driveStick));
 
-        useCommand(technicalStick,12, new RaiseArm(hardware, RaiseArm.PistonDirection.UP,0.2));
-        useCommand(technicalStick,16, new RaiseArm(hardware, RaiseArm.PistonDirection.DOWN,0.2));
-        //useCommand(technicalStick,11, new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 1));
-        useCommand(technicalStick,15, new CloseClaw(hardware, CloseClaw.ClawDirection.CLOSE, 1));
-        useCommand(technicalStick, 15, new OpenClaw(hardware, 1));
-        useCommand(technicalStick, 10, new ExtendArm(hardware, ExtendArm.ArmDirection.EXTEND, 0.1));
-        useCommand(technicalStick, 14, new ExtendArm(hardware, ExtendArm.ArmDirection.RETRACT, 0.1));
+//        useCommand(technicalStick,12, new RaiseArm(hardware, RaiseArm.PistonDirection.UP,0.2));
+//        useCommand(technicalStick,16, new RaiseArm(hardware, RaiseArm.PistonDirection.DOWN,0.2));
+//        useCommand(technicalStick,11, new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 0.05));
+//        useCommand(technicalStick,15, new CloseClaw(hardware, CloseClaw.ClawDirection.CLOSE, 0.05));
+//        //useCommand(technicalStick, 15, new OpenClaw(hardware, 1));
+//        useCommand(technicalStick, 10, new ExtendArm(hardware, ExtendArm.ArmDirection.EXTEND, 0.15));
+//        useCommand(technicalStick, 14, new ExtendArm(hardware, ExtendArm.ArmDirection.RETRACT, 0.15));
 
         bindDriverControl(hardware, driveStick);
         bindTechnicalControl(hardware, technicalStick);
     }
 
     /** Bind primary driver's button commands here */
-    private static void bindDriverControl(RobotHardware hardware, DriveStick primary) {
+    private static void bindDriverControl(RobotHardware hardware, DriveXboxController primary) {
+//        primary.getRightTriggerAxis()
     }
 
     /** Bind technical driver button commands here */
-    private void bindTechnicalControl(RobotHardware hardware, Joystick secondary) {
+    private void bindTechnicalControl(RobotHardware hardware, DriveXboxController secondary) {
 
-        useCommand(secondary,12, new RaiseArm(hardware, RaiseArm.PistonDirection.UP,0.2));
-        useCommand(secondary,16, new RaiseArm(hardware, RaiseArm.PistonDirection.DOWN,0.2));
-        useCommand(secondary,11, new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 1));
-        useCommand(secondary,15, new CloseClaw(hardware, CloseClaw.ClawDirection.CLOSE, 1));
-        //useCommand(secondary, 11, new CloseClaw(hardware, 0.2));
-        useCommand(secondary, 10, new ExtendArm(hardware, ExtendArm.ArmDirection.EXTEND, 0.1));
-        useCommand(secondary, 14, new ExtendArm(hardware, ExtendArm.ArmDirection.RETRACT, 0.1));
+        InputMap.bindAxis("Close", secondary::getRightTriggerAxis);
+        InputMap.bindAxis("Open", secondary::getLeftTriggerAxis);
+
+        InputMap.bindAxis("Extend", secondary::getLeftY);
+        InputMap.bindAxis("Pivot", secondary::getRightY);
+
+        // Claw open directions: top row on num pad, it is a scale of --, -. +, ++ where +- is direction and the number is speed
+//        useCommand(secondary,1, new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 0.4));
+//        useCommand(secondary,2, new CloseClaw(hardware, CloseClaw.ClawDirection.OPEN, 0.2));
+//        useCommand(secondary,3, new CloseClaw(hardware, CloseClaw.ClawDirection.CLOSE, 0.2));
+//        useCommand(secondary,4, new CloseClaw(hardware, CloseClaw.ClawDirection.CLOSE, 0.4));
+//
+//        // Raising arm: rotates the arm around the pivot
+//        useCommand(secondary,5, new RaiseArm(hardware, RaiseArm.PistonDirection.UP,0.5));
+//        useCommand(secondary,9, new RaiseArm(hardware, RaiseArm.PistonDirection.DOWN,0.5));
+//
+//        // Extending arm: extending the scissor arm
+//        useCommand(secondary, 8, new ExtendArm(hardware, ExtendArm.ArmDirection.EXTEND, "extend speed", 0.5));
+//        useCommand(secondary, 12, new ExtendArm(hardware, ExtendArm.ArmDirection.RETRACT, "extend speed", 0.5));
 
 //        useCommand(secondary, 1, new RotateWheel(hardware.getWheel(WheelPosition.FRONT_LEFT)));
 //        useCommand(secondary, 5, new RotateWheel(hardware.getWheel(WheelPosition.BACK_LEFT)));
@@ -104,9 +114,9 @@ public class DriveStation {
                                                 .setRotationSensitivity(.05, 2.5);
     }
 
-    private static DriveXboxController getXbox(){
-        return new DriveXboxController(DRIVE_XBOX_PORT).setDriveSensitivity(.15,1)
-                                                       .setRotationSensitivity(.05,1.5);
+    private static DriveXboxController getXbox(int port){
+        return new DriveXboxController(port).setDriveSensitivity(.3,1)
+                                                       .setRotationSensitivity(.3,1.5);
     }
 
     /** Currently the darker joystick that doesn't support rotation */

@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class AutonomousMove extends CommandBase {
 
-    private static final double DEACCELERATION = 50; // in/s/s
+    private static final double DEACCELERATION = 120; // in/s/s
 
     private double north = 0;
     private double east = 0;
@@ -70,7 +70,7 @@ public class AutonomousMove extends CommandBase {
     public void execute() {
 
 //        System.out.println(chassis.driveModules);
-        System.out.println("Execute For Autonomous is being called");
+//        System.out.println("Execute For Autonomous is being called");
 
         Map<VelocityDirection, Double> currentVelocity = chassis.getVelocityMeasured();
 

@@ -10,6 +10,8 @@ import org.usfirst.frc.team2077.common.command.SelfDefinedCommand;
 public class OpenClaw extends RepeatedCommand {
 
     private final TalonSRX claw;
+
+
     private final double speed;
     private boolean finished;
     public OpenClaw(RobotHardware hardware, double speed){

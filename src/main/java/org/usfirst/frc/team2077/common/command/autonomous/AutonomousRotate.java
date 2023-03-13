@@ -78,7 +78,7 @@ public class AutonomousRotate extends CommandBase {
 
         boolean finished = hasToMoveClockwise != clockwise;
 
-        System.out.println(angularSpeed + ": " + (finished? "finished" : "waiting"));
+//        System.out.println(angularSpeed + ": " + (finished? "finished" : "waiting"));
 
         if(finished){
 

@@ -22,7 +22,7 @@ public class Robot extends TimedRobot {
      * When you click the "Autonomous" option in driver station
      */
     @Override public void autonomousInit() {
-        AutonomousMove move = new AutonomousMove(hardware,50, 0);
+        AutonomousMove move = new AutonomousMove(hardware,70, 0);
 
         move.schedule();
     }

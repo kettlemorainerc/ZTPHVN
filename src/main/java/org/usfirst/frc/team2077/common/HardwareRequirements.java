@@ -44,4 +44,5 @@ public abstract class HardwareRequirements<DriveModule, Chassis extends Abstract
     public AHRS getNavX() {
         return navX;
     }
+
 }
