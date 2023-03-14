@@ -39,12 +39,37 @@ public class DriveXboxController extends XboxController implements DriveStick {
 
     @Override
     public double getNorth() {
-        return DriveStick.adjustInputSensitivity(super.getLeftY(), driveDeadBand, driveExponent);
+
+        int pov = super.getPOV();
+        if(pov == -1) return DriveStick.adjustInputSensitivity(super.getLeftY(), driveDeadBand, driveExponent);
+
+        if(pov == 0 || pov == 45 || pov == 315 ){
+            return 1;
+        }
+
+        if(pov == 180 || pov == 135 || pov == 225){
+            return -1;
+        }
+
+        return 0;
     }
 
     @Override
     public double getEast() {
-        return DriveStick.adjustInputSensitivity(super.getLeftX(), driveDeadBand, driveExponent);
+
+        int pov = super.getPOV();
+        if(pov == -1) return DriveStick.adjustInputSensitivity(super.getLeftX(), driveDeadBand, driveExponent);
+
+        if(pov == 45 || pov == 90 || pov == 135 ){
+            return 1;
+        }
+
+        if(pov == 225 || pov == 270 || pov == 315){
+            return -1;
+        }
+
+        return 0;
+
     }
 
     @Override

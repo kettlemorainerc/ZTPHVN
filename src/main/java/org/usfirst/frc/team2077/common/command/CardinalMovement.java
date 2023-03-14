@@ -9,16 +9,17 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
 import org.usfirst.frc.team2077.common.*;
 import org.usfirst.frc.team2077.common.control.DriveStick;
+import org.usfirst.frc.team2077.common.control.DriveXboxController;
 import org.usfirst.frc.team2077.common.drivetrain.*;
 
 public class CardinalMovement extends CommandBase {
     public static final double ACCELERATION_G_LIMIT = .4;
     public static final double DECELERATION_G_LIMIT = ACCELERATION_G_LIMIT; //1e10 //.35 is the value used for the 03-05-21 version
 
-    protected DriveStick stick;
+    protected DriveXboxController stick;
     protected DriveChassisIF chassis;
 
-    public CardinalMovement(HardwareRequirements<?, ?> hardware, DriveStick stick) {
+    public CardinalMovement(HardwareRequirements<?, ?> hardware, DriveXboxController stick) {
         addRequirements(hardware.getPosition());
 
         this.stick = stick;
@@ -29,8 +30,6 @@ public class CardinalMovement extends CommandBase {
     @Override public void execute() {
         double north = -stick.getNorth();
         double east = stick.getEast();
-
-
 
         // Tank drive
 //		north = Math.abs(north) >= Math.abs(east) ? north : 0;

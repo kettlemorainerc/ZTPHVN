@@ -4,6 +4,7 @@ import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.usfirst.frc.team2077.RobotHardware;
@@ -102,7 +103,11 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     private double targetAngle = 0;
     private double targetMagnitude = 0;
 
+    private double targetVelocity = 0;
+
     private boolean flipMagnitude;
+
+    private PIDController pid;
 
     private MotorPosition position;
     private String angleKey;
@@ -117,6 +122,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         magnitudeMotor = new CANSparkMax(magnitudeId, CANSparkMaxLowLevel.MotorType.kBrushless);
 
         absoluteEncoder = directionMotor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
+
+        pid = new PIDController(0.0001, 0.0000001, 0);
 
         this.register();
 
@@ -195,8 +202,11 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 //        SmartDashboard.putNumber(angleKey, getVelocity());
     }
 
-    private void setMagnitudePercent(double pct) {
-        this.magnitudeMotor.set(pct);
+    private void setMagnitudePercent(double velocity) {
+        magnitudeMotor.set(
+            pid.calculate( magnitudeMotor.getEncoder().getVelocity(), velocity )
+        );
+
     }
 
     private void updateMagnitude() {
@@ -206,11 +216,12 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 //            return;
 //        }
 
-        double magnitude = targetMagnitude * MAX_DRIVE_PERCENT;
+//        double magnitude = targetMagnitude * MAX_DRIVE_PERCENT;
 
-        if(flipMagnitude) magnitude *= -1;
+        double velocity = targetVelocity;
+        if(flipMagnitude) velocity *= -1;
 
-        setMagnitudePercent(magnitude);
+        setMagnitudePercent(velocity);
 
     }
 
@@ -278,7 +289,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     @Override public void setVelocity(double velocity) {
-        setMagnitude(velocity / getMaximumSpeed());
+        targetVelocity = velocity;
+//        setMagnitude(velocity / getMaximumSpeed());
     }
 
     @Override public WheelPosition getWheelPosition() {
