@@ -41,14 +41,16 @@ public class DriveXboxController extends XboxController implements DriveStick {
     public double getNorth() {
 
         int pov = super.getPOV();
-        if(pov == -1) return DriveStick.adjustInputSensitivity(super.getLeftY(), driveDeadBand, driveExponent);
-
-        if(pov == 0 || pov == 45 || pov == 315 ){
-            return 1;
+        if(pov == DPad.UNPRESSED) {
+            return DriveStick.adjustInputSensitivity(super.getLeftY(), driveDeadBand, driveExponent);
         }
 
-        if(pov == 180 || pov == 135 || pov == 225){
-            return -1;
+        if(pov == DPad.NORTH || pov == DPad.NORTH_EAST || pov == DPad.NORTH_WEST){
+            return DPad.SPEED;
+        }
+
+        if(pov == DPad.SOUTH || pov == DPad.SOUTH_EAST || pov == DPad.SOUTH_WEST){
+            return -DPad.SPEED;
         }
 
         return 0;
@@ -58,14 +60,16 @@ public class DriveXboxController extends XboxController implements DriveStick {
     public double getEast() {
 
         int pov = super.getPOV();
-        if(pov == -1) return DriveStick.adjustInputSensitivity(super.getLeftX(), driveDeadBand, driveExponent);
-
-        if(pov == 45 || pov == 90 || pov == 135 ){
-            return 1;
+        if(pov == DPad.UNPRESSED) {
+            return DriveStick.adjustInputSensitivity(super.getLeftX(), driveDeadBand, driveExponent);
         }
 
-        if(pov == 225 || pov == 270 || pov == 315){
-            return -1;
+        if(pov == DPad.EAST || pov == DPad.NORTH_EAST || pov == DPad.SOUTH_EAST){
+            return DPad.SPEED;
+        }
+
+        if(pov == DPad.WEST || pov == DPad.NORTH_WEST || pov == DPad.SOUTH_WEST){
+            return -DPad.SPEED;
         }
 
         return 0;
@@ -76,5 +80,19 @@ public class DriveXboxController extends XboxController implements DriveStick {
     public double getRotation() {
         return DriveStick.adjustInputSensitivity(super.getRightX(), driveDeadBand, driveExponent);
     }
+    
+    private static class DPad {
+        static final int NORTH = 0;
+        static final int NORTH_EAST = 45;
+        static final int EAST = 90;
+        static final int SOUTH_EAST = 135;
+        static final int SOUTH = 180;
+        static final int SOUTH_WEST = 225;
+        static final int WEST = 270;
+        static final int NORTH_WEST = 315;
 
+        static final int UNPRESSED = -1;
+
+        static final float SPEED = 1;
+    }
 }
