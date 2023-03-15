@@ -11,10 +11,11 @@ import org.usfirst.frc.team2077.common.*;
 import org.usfirst.frc.team2077.common.control.DriveStick;
 import org.usfirst.frc.team2077.common.control.DriveXboxController;
 import org.usfirst.frc.team2077.common.drivetrain.*;
+import org.usfirst.frc.team2077.util.SmartDashNumber;
 
 public class CardinalMovement extends CommandBase {
-    public static final double ACCELERATION_G_LIMIT = .4;
-    public static final double DECELERATION_G_LIMIT = ACCELERATION_G_LIMIT; //1e10 //.35 is the value used for the 03-05-21 version
+    public static final SmartDashNumber ACCELERATION_G_LIMIT = new SmartDashNumber("Cardinal Acceleration Gs", 1D, true);
+    public static final SmartDashNumber DECELERATION_G_LIMIT = new SmartDashNumber("Carindal Deceleration Gs", 9999D, true);
 
     protected DriveXboxController stick;
     protected DriveChassisIF chassis;
@@ -24,7 +25,13 @@ public class CardinalMovement extends CommandBase {
 
         this.stick = stick;
         this.chassis = hardware.getChassis();
-        this.chassis.setGLimits(ACCELERATION_G_LIMIT, DECELERATION_G_LIMIT);
+        updateAccelerationLimits();
+        ACCELERATION_G_LIMIT.setOnChange(this::updateAccelerationLimits);
+        DECELERATION_G_LIMIT.setOnChange(this::updateAccelerationLimits);
+    }
+
+    private void updateAccelerationLimits() {
+        this.chassis.setGLimits(ACCELERATION_G_LIMIT.get(), DECELERATION_G_LIMIT.get());
     }
 
     @Override public void execute() {

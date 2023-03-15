@@ -87,8 +87,8 @@ public class AccelerationLimits {
     }
 
     public double[] get(VelocityDirection d, DriveChassisIF chassis) {
-        double[] limits = LIMITS.getMatrix()[d.ordinal()];
         if (d == ROTATION) {
+            double[] limits = LIMITS.getMatrix()[d.ordinal()];
             Map<VelocityDirection, Double> max = chassis.getMaximumVelocity();
             double[] adjustedLimits = new double[2];
             int accel = ACCELERATION.ordinal();
@@ -99,6 +99,7 @@ public class AccelerationLimits {
 
             return adjustedLimits;
         }
+
         return LIMITS.getMatrix()[d.ordinal()];
     }
 

@@ -10,15 +10,16 @@ import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 
-public class SmartDashNumber implements SmartDashValue<Number> {
+public class SmartDashNumber implements SmartDashValue<Double> {
     private static NetworkTable table = NetworkTableInstance.getDefault().getTable("SmartDashboard");
 
     private final NetworkTableEntry entry;
-    private Number value;
+    private Runnable onChange;
+    private Double value;
 
-    public SmartDashNumber(String key, Number defaultValue, boolean persistent) {
+    public SmartDashNumber(String key, Double defaultValue, boolean persistent) {
         if(SmartDashboard.getNumber(key, Double.MIN_VALUE) == Double.MIN_VALUE) {
-            SmartDashboard.putNumber(key, defaultValue.doubleValue());
+            SmartDashboard.putNumber(key, defaultValue);
         }
 
         entry = table.getEntry(key);
@@ -34,19 +35,23 @@ public class SmartDashNumber implements SmartDashValue<Number> {
         table.addListener(key, events, (networkTable, tableKey, event) -> {
             this.value = event.valueData.value.getDouble();
 //            System.out.println("Updating " + tableKey + ": " + value);
-
+            if(onChange != null) onChange.run();
         });
     }
 
-    @Override public Number get() {
+    public void setOnChange(Runnable runnable) {
+        this.onChange = runnable;
+    }
+
+    @Override public Double get() {
         return value;
     }
 
-    @Override public Optional<Number> getNullable() {
+    @Override public Optional<Double> getNullable() {
         return Optional.ofNullable(value);
     }
 
-    @Override public void set(Number to) {
+    @Override public void set(Double to) {
         if(!Objects.equals(to, value)) entry.setNumber(to);
     }
 }

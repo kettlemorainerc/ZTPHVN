@@ -148,6 +148,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     @Override public void setTargetMagnitude(double magnitude) {
+        if(flipMagnitude) magnitude = -magnitude;
         this.targetMagnitude = magnitude;
     }
 
@@ -203,25 +204,26 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     private void setMagnitudePercent(double velocity) {
-        magnitudeMotor.set(
-            pid.calculate( magnitudeMotor.getEncoder().getVelocity(), velocity )
-        );
+        magnitudeMotor.set(velocity);
 
+        // magnitudeMotor.set(
+        //     pid.calculate( magnitudeMotor.getEncoder().getVelocity(), velocity )
+        // );
     }
 
     private void updateMagnitude() {
 
-//        if(rotateFirst){
-//            setMagnitudePercent(0);
-//            return;
-//        }
+       if(rotateFirst){
+           setMagnitudePercent(0);
+           return;
+       }
 
-//        double magnitude = targetMagnitude * MAX_DRIVE_PERCENT;
+       double magnitude = targetMagnitude * MAX_DRIVE_PERCENT;
 
-        double velocity = targetVelocity;
-        if(flipMagnitude) velocity *= -1;
-
-        setMagnitudePercent(velocity);
+        // double velocity = targetVelocity;
+        // if(flipMagnitude) velocity *= -1;
+        //
+        setMagnitudePercent(magnitude);
 
     }
 
@@ -289,8 +291,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     @Override public void setVelocity(double velocity) {
-        targetVelocity = velocity;
-//        setMagnitude(velocity / getMaximumSpeed());
+        // targetVelocity = velocity;
+       setMagnitude(velocity / getMaximumSpeed());
     }
 
     @Override public WheelPosition getWheelPosition() {

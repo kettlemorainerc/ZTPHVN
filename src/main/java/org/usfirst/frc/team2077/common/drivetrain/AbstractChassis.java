@@ -97,11 +97,12 @@ public abstract class AbstractChassis<DriveModule> extends SubsystemBase impleme
     protected void limitVelocity(VelocityDirection direction, double max) {
         double currentVelocity = this.velocity.get(direction);
         double targetVelocity = this.targetVelocity.get(direction);
-
-        boolean accelerating = Math.abs(targetVelocity) >= Math.abs(currentVelocity) && Math.signum(targetVelocity) == Math.signum(currentVelocity);
-        double deltaLimit = accelerationLimits.get(direction, accelerating ? Type.ACCELERATION : Type.DECELERATION) *
-                timeSinceLastUpdate; // always positive
         double deltaRequested = targetVelocity - currentVelocity;
+
+        boolean accelerating = Math.signum(deltaRequested) == Math.signum(targetVelocity);
+        Type type = accelerating ? Type.ACCELERATION : Type.DECELERATION;
+
+        double deltaLimit = accelerationLimits.get(direction, type) * timeSinceLastUpdate; // always positive
         double delta = Math.min(deltaLimit, Math.abs(deltaRequested)) * Math.signum(deltaRequested);
         double v = currentVelocity + delta;
         double newDirectionVelocity = Math.max(-max, Math.min(max, v));
@@ -159,15 +160,15 @@ public abstract class AbstractChassis<DriveModule> extends SubsystemBase impleme
     }
 
     @Override public void setVelocity(double north, double east, double clockwise) {
-        setVelocity(north, east, clockwise, getAccelerationLimits());
+        setVelocity(north, east, clockwise, accelerationLimits);
     }
 
     @Override public void setVelocity(double north, double east) {
-        setVelocity(north, east, getAccelerationLimits());
+        setVelocity(north, east, accelerationLimits);
     }
 
     @Override public void setRotation(double clockwise) {
-        setRotation(clockwise, getAccelerationLimits());
+        setRotation(clockwise, accelerationLimits);
     }
 
     @Override public final void setVelocityPercent(double north, double east, double clockwise) {
