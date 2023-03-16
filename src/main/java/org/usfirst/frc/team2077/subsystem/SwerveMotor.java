@@ -1,9 +1,6 @@
 package org.usfirst.frc.team2077.subsystem;
 
-import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel;
-import com.revrobotics.SparkMaxAbsoluteEncoder;
+import com.revrobotics.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -97,7 +94,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     private final CANSparkMax directionMotor;
-    private final CANSparkMax magnitudeMotor;
+    private final BetterCanSparkMax magnitudeMotor;
 
     private final AbsoluteEncoder absoluteEncoder;
 
@@ -123,7 +120,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         angleKey = "angle_key";
 
         directionMotor = new CANSparkMax(directionId, CANSparkMaxLowLevel.MotorType.kBrushless);
-        magnitudeMotor = new CANSparkMax(magnitudeId, CANSparkMaxLowLevel.MotorType.kBrushless);
+        magnitudeMotor = new BetterCanSparkMax(magnitudeId, CANSparkMaxLowLevel.MotorType.kBrushless);
 
         absoluteEncoder = directionMotor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
 //K: 0.000001
