@@ -8,7 +8,6 @@ package org.usfirst.frc.team2077.common.command;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
 import org.usfirst.frc.team2077.common.*;
-import org.usfirst.frc.team2077.common.control.DriveStick;
 import org.usfirst.frc.team2077.common.control.DriveXboxController;
 import org.usfirst.frc.team2077.common.drivetrain.*;
 import org.usfirst.frc.team2077.util.SmartDashNumber;
@@ -26,8 +25,8 @@ public class CardinalMovement extends CommandBase {
         this.stick = stick;
         this.chassis = hardware.getChassis();
         updateAccelerationLimits();
-        ACCELERATION_G_LIMIT.setOnChange(this::updateAccelerationLimits);
-        DECELERATION_G_LIMIT.setOnChange(this::updateAccelerationLimits);
+        ACCELERATION_G_LIMIT.onChange(this::updateAccelerationLimits);
+        DECELERATION_G_LIMIT.onChange(this::updateAccelerationLimits);
     }
 
     private void updateAccelerationLimits() {

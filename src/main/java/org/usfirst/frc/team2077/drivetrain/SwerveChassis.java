@@ -14,6 +14,7 @@ import org.usfirst.frc.team2077.subsystem.SwerveMotor;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static org.usfirst.frc.team2077.common.VelocityDirection.*;
@@ -95,8 +96,9 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
     public static WheelPosition LOGGED_POSITION = WheelPosition.FRONT_RIGHT;
 
     @Override protected void updateDriveModules() {
+        System.out.printf("[target velocities=%s]%n", targetVelocity);
         Map<WheelPosition, SwerveTargetValues> wheelTargets = math.targetsForVelocities(
-              velocity,
+              targetVelocity,
               maximumSpeed,
               maximumRotation
         );
@@ -110,8 +112,8 @@ public class SwerveChassis extends AbstractChassis<SwerveMotor> {
 
             motor.setTargetAngle(value.getAngle());
 
-            double targetVelocity = value.getMagnitude() * maximumSpeed;
-            if(Math.abs(value.getMagnitude()) > 0.0001) {
+            double targetVelocity = Math.abs(value.getMagnitude() * maximumSpeed);
+            if(value.getMagnitude() > 0.0001) {
                 targetVelocity = Math.max(targetVelocity, minimumSpeed);
             }
             motor.setVelocity(targetVelocity);
