@@ -127,7 +127,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
         absoluteEncoder = directionMotor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
 //K: 0.000001
-        pid = new PIDController(p.get(), i.get(), 0);
+        pid = new PIDController(0.000008, 0.000001, 0);//p.get(), i.get(), 0);
 
         p.onChange(this::updatePID);
         i.onChange(this::updatePID);
@@ -147,7 +147,7 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     private void updatePID(){
-        pid.setPID(p.get(), i.get(), 0);
+//        pid.setPID(p.get(), i.get(), 0);
     }
 
     public void setMagnitude(double magnitude) {
@@ -206,6 +206,8 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
         updateRotation();
 
+        System.out.printf("e45drgyHUGIawsedrghjkBY*PMOIDVR^D;R*jokl[p = %s][i = %s]", pid.getP(), pid.getI());
+
         if(targetVelocity != 0) {
             SmartDashboard.putNumber("targetVelocity: ", targetVelocity);
             SmartDashboard.putNumber(position.wheelPosition + " velocity" ,
@@ -223,12 +225,11 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     private void setMagnitudePercent(double velocity) {
-
         double deltaPercent = pid.calculate( magnitudeMotor.getEncoder().getVelocity() );
 
         double newPercent = magnitudeMotor.get() + deltaPercent;
 
-        if(Math.abs(newPercent) < 0.0001 ) newPercent = 0;
+        if(Math.abs(newPercent) < 0.005 ) newPercent = 0;
 
         System.out.printf(
                 "[actual rpm=%s][set rpm=%s][pid target %%=%s]%n",
