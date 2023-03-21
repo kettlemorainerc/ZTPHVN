@@ -46,11 +46,11 @@ public class DriveXboxController extends XboxController implements DriveStick {
         }
 
         if(pov == DPad.NORTH || pov == DPad.NORTH_EAST || pov == DPad.NORTH_WEST){
-            return DPad.SPEED;
+            return -DPad.SPEED;
         }
 
         if(pov == DPad.SOUTH || pov == DPad.SOUTH_EAST || pov == DPad.SOUTH_WEST){
-            return -DPad.SPEED;
+            return DPad.SPEED;
         }
 
         return 0;

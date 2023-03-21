@@ -19,4 +19,5 @@ public class BetterCanSparkMax extends CANSparkMax {
     public void setTargetVelocity(double velocity) {
         setpointCommand(velocity, ControlType.kVelocity);
     }
+
 }

@@ -3,6 +3,7 @@ package org.usfirst.frc.team2077;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.*;
 import org.usfirst.frc.team2077.common.command.autonomous.AutonomousMove;
+import org.usfirst.frc.team2077.common.command.autonomous.AutonomousPIDedMove;
 import org.usfirst.frc.team2077.common.command.autonomous.AutonomousRotate;
 
 public class Robot extends TimedRobot {
@@ -22,7 +23,7 @@ public class Robot extends TimedRobot {
      * When you click the "Autonomous" option in driver station
      */
     @Override public void autonomousInit() {
-        AutonomousMove move = new AutonomousMove(hardware,70, 0);
+        Command move = new AutonomousPIDedMove(hardware,45, 100);
 
         move.schedule();
     }

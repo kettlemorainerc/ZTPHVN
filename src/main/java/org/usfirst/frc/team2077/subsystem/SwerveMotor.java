@@ -16,19 +16,19 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         // MAX_RPM: 5800
         // max rpm 2: 5817
         // MIN PERCENT .0105
-        FRONT_RIGHT(WheelPosition.FRONT_RIGHT, 7, 8, 4754, 11182, 0.9030,0.0105),
+        FRONT_RIGHT(WheelPosition.FRONT_RIGHT, 7, 8, 4754, 11182, 0.068,0.0105),
         // Max: 5600
         // Max RPM 2: 5817
         // MIN PERCENT: 0.02
-        FRONT_LEFT(WheelPosition.FRONT_LEFT, 1, 2, 5217, 11160, 0.1638, 0.02),
+        FRONT_LEFT(WheelPosition.FRONT_LEFT, 1, 2, 5217, 11160, 0.659, 0.02),
         // Max: 5700
         // Max RPM 2: 5862
         // MIN PERCENT: 0.02
-        BACK_RIGHT(WheelPosition.BACK_RIGHT, 5, 6, 4817, 11091, 0.2581, 0.02),
+        BACK_RIGHT(WheelPosition.BACK_RIGHT, 5, 6, 4817, 11091, 0.100, 0.02),
         // Max 5700,
         // Max rpm 2: 5737
         // MIN_PERCENT: 0.0305
-        BACK_LEFT(WheelPosition.BACK_LEFT, 3, 4, 4142, 10931, 0.8882, 0.0305);
+        BACK_LEFT(WheelPosition.BACK_LEFT, 3, 4, 4142, 10931, 0.397, 0.0305);
 
         private final WheelPosition wheelPosition;
         private final int directionId;
@@ -66,20 +66,17 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     private static final double DEAD_ANGLE = 1;
 
-    private static final double MAX_DRIVE_PERCENT = 0.2;
+//    private static final double SLOW_DOWN_RANGE = 0;
+    private static final double MINIMUM_DIRECTION_PERCENT = 0.075;
 
-    private static final double MIN_ROTATE_PERCENT = 0.0305;
-//    private static final double MAX_ROTATE_PERCENT = 1.0;
+    private static final double MAX_DRIVE_PERCENT = 0.5;
 
     private static final double WHEEL_RADIUS = 2.0;
     private static final double WHEEL_CIRCUMFERENCE = (2 * Math.PI * WHEEL_RADIUS);
 
-    private static final double ANGLE_DIFF_DIVISION = -135;
-    private static final double MAX_DIRECTION_PERCENT = 0.8;
-
     private static final double DRIVE_GEAR_RATIO = 5.08;
 
-    private static final double MAX_ROTATION_RPM;
+    private static final double MAX_DIRECTION_RPM;
 
     public static boolean rotateFirst = false;
 
@@ -90,28 +87,26 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
             max = Math.min(position.maxRotationRPM, max);
         }
 
-        MAX_ROTATION_RPM = max;
+        MAX_DIRECTION_RPM = max;
     }
 
-    private final CANSparkMax directionMotor;
+    private final BetterCanSparkMax directionMotor;
     private final BetterCanSparkMax magnitudeMotor;
 
     private final AbsoluteEncoder absoluteEncoder;
 
     private double targetAngle = 0;
-    private double targetMagnitude = 0;
-
     private double targetVelocity = 0;
 
     private boolean flipMagnitude;
 
-    private PIDController pid;
+    private PIDController pid = new PIDController(0.024, 0.009, 0);
 
     private MotorPosition position;
     private String angleKey;
 
-    private static SmartDashNumber p = new SmartDashNumber("P in PID", 0.000008, true);
-    private static SmartDashNumber i = new SmartDashNumber("l in PID", 0.000001, true);
+    private static SmartDashNumber p = new SmartDashNumber("P in PID", -135.0, true);
+    private static SmartDashNumber i = new SmartDashNumber("l in PID", 1.0, true);
 
     public SwerveMotor(
             int directionId,
@@ -119,15 +114,15 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     ) {
         angleKey = "angle_key";
 
-        directionMotor = new CANSparkMax(directionId, CANSparkMaxLowLevel.MotorType.kBrushless);
+        directionMotor = new BetterCanSparkMax(directionId, CANSparkMaxLowLevel.MotorType.kBrushless);
         magnitudeMotor = new BetterCanSparkMax(magnitudeId, CANSparkMaxLowLevel.MotorType.kBrushless);
 
         absoluteEncoder = directionMotor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
-//K: 0.000001
-        pid = new PIDController(0.000008, 0.000001, 0);//p.get(), i.get(), 0);
 
         p.onChange(this::updatePID);
         i.onChange(this::updatePID);
+
+        pid.setSetpoint(0.0);
 
         this.register();
 
@@ -144,20 +139,11 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
     }
 
     private void updatePID(){
-//        pid.setPID(p.get(), i.get(), 0);
-    }
-
-    public void setMagnitude(double magnitude) {
-        setTargetMagnitude(magnitude);
+        pid.setPID(p.get(), i.get(), 0);
     }
 
     @Override public void setTargetDegrees(double degrees) {
         setTargetAngle(degrees);
-    }
-
-    @Override public void setTargetMagnitude(double magnitude) {
-        if(flipMagnitude) magnitude = -magnitude;
-        this.targetMagnitude = magnitude;
     }
 
     public void setTargetAngle(double angle) {
@@ -182,6 +168,10 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         setDirectionMotor(percent);
     }
 
+    private double getWheelRotation(){
+        return absoluteEncoder.getPosition() - position.encoderOffset;
+    }
+
     public double getWheelAngle() {
         double percentTurned = getWheelRotation();
         double angle = percentTurned * 360;
@@ -189,110 +179,84 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
         angle %= 360.0;
         if(angle < 0) angle += 360.0;
 
-//        SmartDashboard.putNumber(angleKey, angle);
-
         return angle;
     }
 
-    public boolean isAtTarget(){
-        return Math.abs(getAngleDifference(getWheelAngle(), targetAngle)) < DEAD_ANGLE;
-    }
-
     @Override public void periodic() {
+
         updateMagnitude();
 
         updateRotation();
 
-        System.out.printf("e45drgyHUGIawsedrghjkBY*PMOIDVR^D;R*jokl[p = %s][i = %s]", pid.getP(), pid.getI());
-
-        if(targetVelocity != 0) {
-            SmartDashboard.putNumber("targetVelocity: ", targetVelocity);
-            SmartDashboard.putNumber(position.wheelPosition + " velocity" ,
-//                    magnitudeMotor.get()
-                magnitudeMotor.getEncoder().getVelocity()
-            );
-        }
-
-//        getVelocity();
-
-//        SmartDashboard.putNumber("Zero Offset " + position + ": ", absoluteEncoder.getZeroOffset());
-//        SmartDashboard.putNumber("position " + position + ": ", absoluteEncoder.getPosition());
-
-//        SmartDashboard.putNumber(angleKey, getVelocity());
     }
 
+    @Override
+    public void setTargetMagnitude(double magnitude) {}
+
     private void setMagnitudePercent(double velocity) {
-        double deltaPercent = pid.calculate( magnitudeMotor.getEncoder().getVelocity() );
 
-        double newPercent = magnitudeMotor.get() + deltaPercent;
+//        if(!SwerveMotor.checkDirection()) return;
 
-        if(Math.abs(newPercent) < 0.005 ) newPercent = 0;
-
-        System.out.printf(
-                "[actual rpm=%s][set rpm=%s][pid target %%=%s]%n",
-                magnitudeMotor.getEncoder().getVelocity(),
-                velocity,
-                newPercent
-        );
-
-        if(newPercent != 0) {
-            SmartDashboard.putNumber(position.wheelPosition + " Target", newPercent);
-        }
-        magnitudeMotor.set(newPercent);
+        if(flipMagnitude) velocity = -velocity;
+        magnitudeMotor.setTargetVelocity(-velocity);
     }
 
     private void updateMagnitude() {
-
-        if(rotateFirst){
-            setMagnitudePercent(0);
-            return;
-        }
-
-        pid.setSetpoint(targetVelocity);
-        magnitudeMotor.setInverted(!flipMagnitude);
-
         setMagnitudePercent(targetVelocity);
-
     }
 
-//    private static final SmartDashNumber SLOW_DIVISION = new SmartDashNumber("Slow Division in PID", -20, true);
-//    private static final SmartDashNumber MAX_PERCENT = new SmartDashNumber("Maximum Percent in PID", .3, true);
+
+
 
     private void updateRotation() {
-//        if (/*this.targetMagnitude == 0 && */!rotateFirst) {
-//            setDirectionMotor(0);
-//            return;
-//        }
 
-//        if(this.targetMagnitude == 0){
-//            setDirectionMotor(0);
-//            return;
-//        }
+        if(this.targetVelocity == 0){
+            setDirectionMotor(0);
+            return;
+        }
 
         double currentAngle = getWheelAngle();
         double angleDifference = getAngleDifference(currentAngle, targetAngle);
 
-//        SmartDashboard.putNumber("angleDiff" + position.wheelPosition, angleDifference);
+       SmartDashboard.putNumber(position.wheelPosition + " Target", angleDifference);
 
-        double angleDifferenceDividedByAConstant = angleDifference / ANGLE_DIFF_DIVISION;
+        double c = pid.calculate( angleDifference );
 
-        double speed = 2.0 / ( 1.0 + Math.pow(Math.E, angleDifferenceDividedByAConstant)) - 1.0;
+        if(Math.abs(c) < 0.0001) c = 0;
 
-        speed *= MAX_DIRECTION_PERCENT;
+        directionMotor.set(-c);
+//
+//        //Equation now decreases acceleration as the angle approaches 0, NEEDS TESTING.
+//        double a = p.get();
+////        double a = SLOW_DOWN_RANGE;
+//
+//        double b = (Math.abs(angleDifference) - 2 * a);
+//
+//        double v = angleDifference * angleDifference * b * b;
+//
+//        v /= Math.pow(a, 4);
+//
+//        v = Math.min(Math.max(v, i.get()), 1.0) * Math.signum(angleDifference);
+////        v = Math.min(Math.max(v, MINIMUM_DIRECTION_PERCENT), 1.0) * Math.signum(angleDifference);
+//
+//        v *= MAX_DIRECTION_RPM;
+//
+//        //Old way of doing it.
+////        double speed = 2.0 / ( 1.0 + Math.pow(Math.E, angleDifferenceDividedByAConstant)) - 1.0;
+////        speed = Math.max(Math.abs(speed), position.minPercent) * Math.signum(speed);
+//
+//        if(Math.abs(angleDifference) < DEAD_ANGLE) v = 0.0;
 
-        speed = Math.max(Math.abs(speed), position.minPercent) * Math.signum(speed);
+//        setDirectionMotor(v);
 
-        if(Math.abs(angleDifference) < DEAD_ANGLE) speed = 0.0;
-
-        setDirectionMotor(speed);
     }
 
     private void setDirectionMotor(double percent) {
 //        SmartDashboard.putNumber("percentPower" + position.wheelPosition, percent);
 
-        percent *= (MAX_ROTATION_RPM / position.maxRotationRPM);
+//        percent *= (MAX_ROTATION_RPM / position.maxRotationRPM);
 
-        directionMotor.set(percent);
+        directionMotor.setTargetVelocity(percent);
     }
 
     public MotorPosition getPosition() {
@@ -352,10 +316,14 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
 
     @Override public void resetDistance() {}
 
-    //Checks if motors are all facing towards target, if so removes the "rotate" flag, allowing the magnitude motors to run
-    public static void checkDirection(){
+    public boolean isAtTarget(){
+        return Math.abs(getAngleDifference(getWheelAngle(), targetAngle)) < DEAD_ANGLE;
+    }
 
-        if(!rotateFirst) return;
+    //Checks if motors are all facing towards target, if so removes the "rotate" flag, allowing the magnitude motors to run
+    public static boolean checkDirection(){
+
+//        if(!rotateFirst) return;
 
         boolean atDirection = true;
         RobotHardware hardware = RobotHardware.getInstance();
@@ -365,16 +333,13 @@ public class SwerveMotor implements Subsystem, SwerveModule, DriveModuleIF {
             atDirection &= module.isAtTarget();
         }
 
-        if(atDirection) rotateFirst = false;
+        return atDirection;
+//        if(atDirection) rotateFirst = false;
 
     }
 
     @Override
     public String toString() {
         return "" + getVelocity();
-    }
-
-    private double getWheelRotation(){
-        return absoluteEncoder.getPosition() - position.encoderOffset;
     }
 }
